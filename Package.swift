@@ -26,8 +26,5 @@ let package = Package(
         .target(
             name: "VaultsLib",
             dependencies: ["AES256CBC"]),
-        .testTarget(
-            name: "VaultsLibTests",
-            dependencies: ["VaultsLib"]),
     ]
 )
