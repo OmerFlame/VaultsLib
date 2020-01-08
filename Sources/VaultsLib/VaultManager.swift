@@ -16,10 +16,17 @@ public class VaultManager {
         }
         catch let error as NSError
         {
-            print("Unable to create directory \(error.debugDescription)")
+            print("Unable to create directory: \(error.debugDescription)")
         }
         // Literally write null to generate our index
         writeToIndex(vaultPath: path, what: "")
     }
    
+    public static func deleteVault(path: String) {
+        do {
+            try FileManager.default.removeItem(atPath: path)
+        } catch let error as NSError {
+            print("Unable to delete directory: \(error.debugDescription)")
+        }
+    }
 }
