@@ -6,10 +6,11 @@
 //
 
 import Foundation
+import AES256CBC
 public class VaultManager {
     // path: where's the vault?
     // pass: your password
-    public static func createVault(path: String, pass: String) {
+    public static func createVault(path: String, pass: String, indexContent: String) {
         do
         {
             try FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true, attributes: nil)
@@ -18,8 +19,9 @@ public class VaultManager {
         {
             print("Unable to create directory: \(error.debugDescription)")
         }
-        // Literally write null to generate our index
-        writeToIndex(vaultPath: path, what: "")
+        // Initialize the index file with the vault's name (TEST)
+        // TODO: Encrypt!!!
+        writeToIndex(vaultPath: path, what: indexContent)
     }
    
     public static func deleteVault(path: String) {
@@ -28,5 +30,9 @@ public class VaultManager {
         } catch let error as NSError {
             print("Unable to delete directory: \(error.debugDescription)")
         }
+    }
+    
+    public static func readVaultIndex(vault: String) -> String {
+        return readIndex(vaultName: vault)
     }
 }
