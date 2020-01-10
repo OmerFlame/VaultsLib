@@ -20,8 +20,8 @@ public class VaultManager {
             print("Unable to create directory: \(error.debugDescription)")
         }
         // Initialize the index file with the vault's name (TEST)
-        // TODO: Encrypt!!!
-        writeToIndex(vaultPath: path, what: indexContent)
+        let encryptedContent = AES256CBC.encryptString(indexContent, password: pass)!
+        writeToIndex(vaultPath: path, what: encryptedContent)
     }
    
     public static func deleteVault(path: String) {
