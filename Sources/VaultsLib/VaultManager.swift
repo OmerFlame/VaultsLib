@@ -7,6 +7,7 @@
 
 import Foundation
 import AES256CBC
+import CryptoSwift
 public class VaultManager {
     // path: where's the vault?
     // pass: your password
@@ -20,8 +21,9 @@ public class VaultManager {
             print("Unable to create directory: \(error.debugDescription)")
         }
         // Initialize the index file with the vault's name (TEST)
-        let encryptedContent = AES256CBC.encryptString(indexContent, password: pass)!
-        writeToIndex(vaultPath: path, what: encryptedContent)
+        let hashedPass = pass.sha256()
+        let encryptedContent = AES256CBC.encryptString(indexContent, password: String(hashedPass.prefix(32)))
+        writeToIndex(vaultPath: path, what: encryptedContent!)
     }
    
     public static func deleteVault(path: String) {
