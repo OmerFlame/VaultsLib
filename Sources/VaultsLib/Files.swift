@@ -6,7 +6,12 @@
 //
 
 import Foundation
-func writeToFile(path: String, contents: String) {
+
+public enum FileErrors: Error {
+    case genericError
+}
+
+func writeToFile(path: String, contents: String) throws {
     print("Writing to:", path)
     let data = contents.data(using: String.Encoding.ascii)!
     let file = (path as NSString).expandingTildeInPath
@@ -16,15 +21,20 @@ func writeToFile(path: String, contents: String) {
         print("Could not write index!")
     }
 }
-func writeToIndex(vaultPath: String, what: String) {
-    writeToFile(path: vaultPath+"/"+indexName, contents: what)
+func writeToIndex(vaultPath: String, what: String) throws {
+    do {
+        try writeToFile(path: vaultPath+"/"+indexName, contents: what)
+    } catch let error as NSError {
+        print("COULD NOT WRITE TO INDEX: \(error.debugDescription)")
+        throw FileErrors.genericError
+    }
 }
 
-func readIndex(vaultName: String) -> String {
+func readIndex(vaultName: String) throws -> String {
     do {
         return try String(contentsOf: URL.init(fileURLWithPath: dir + "/" + vaultName + "/" + indexName))
     } catch let error as NSError {
         print("Could not read index! Reason: \(error)")
-        return "Could not read index! Reason: \(error)"
+        throw FileErrors.genericError
     }
 }

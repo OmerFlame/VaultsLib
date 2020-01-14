@@ -7,3 +7,4 @@
 import Foundation
 let indexName = "index"
 let dir = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+var currentPass = ""
