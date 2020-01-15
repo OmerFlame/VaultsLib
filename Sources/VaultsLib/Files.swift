@@ -30,9 +30,9 @@ func writeToIndex(vaultPath: String, what: String) throws {
     }
 }
 
-func readIndex(vaultName: String) throws -> String {
+func readIndex(vaultPath: String) throws -> String {
     do {
-        return try String(contentsOf: URL.init(fileURLWithPath: dir + "/" + vaultName + "/" + indexName))
+        return try String(contentsOf: URL.init(fileURLWithPath: vaultPath))
     } catch let error as NSError {
         print("Could not read index! Reason: \(error)")
         throw FileErrors.genericError

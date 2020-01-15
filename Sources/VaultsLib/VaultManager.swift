@@ -52,9 +52,9 @@ public class VaultManager {
         return finalPass
     }
     
-    public static func readVaultIndex(vault: String) -> String {
+    public static func readVaultIndex(vaultPath: String) -> String {
         do {
-            return try readIndex(vaultName: vault)
+            return try readIndex(vaultPath: vaultPath)
         } catch let error as NSError {
             print("COULD NOT READ VAULT INDEX: \(error.debugDescription)")
             return error.debugDescription
@@ -63,9 +63,10 @@ public class VaultManager {
     }
     
     // burn this down
+    /*
     public static func encryptVault(vaultName: String) throws {
         let encryptedVaultPass = encryptPassword(plaintextPass: currentPass)
-        let indexContents = readVaultIndex(vault: vaultName)
+        let indexContents = readVaultIndex(vaultPath: vaultName)
         do {
             let contentsToWrite = AES256CBC.encryptString(indexContents, password: encryptedVaultPass)
             try writeToIndex(vaultPath: dir + "/" + vaultName, what: contentsToWrite!)
@@ -73,11 +74,12 @@ public class VaultManager {
             print("COULD NOT ENCRYPT VAULT: \(error.debugDescription)")
         }
     }
+ */
     
-    public static func decryptVaultIndex(vaultName: String, plaintextPass: String) throws -> String {
+    public static func decryptVaultIndex(vaultPath: String, plaintextPass: String) throws -> String {
         currentPass = plaintextPass
         let encryptedVaultPass = encryptPassword(plaintextPass: currentPass)
-        let indexContents = readVaultIndex(vault: vaultName)
+        let indexContents = readVaultIndex(vaultPath: vaultPath)
         let decryptedIndex = AES256CBC.decryptString(indexContents, password: encryptedVaultPass)
         if (decryptedIndex == nil) {
             print("hi nsa")
