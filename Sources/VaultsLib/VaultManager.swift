@@ -18,12 +18,15 @@ public class VaultManager {
     // path: where's the vault?
     // pass: your password
     
-    public static func createVault(path: String, pass: String, indexContent: String) throws {
+    public static func createVault(path: String, pass: String) throws {
         do
         {
             // Initialize the index file with the encrypted vault's name
             let hashedPass = pass.sha256()
-            let encryptedContent = AES256CBC.encryptString(indexContent, password: String(hashedPass.prefix(32)))
+            let messageDictionary : [String: Any] = [:]
+            let jsonData = try JSONSerialization.data(withJSONObject: messageDictionary, options: [])
+            let jsonString = String(data: jsonData, encoding: String.Encoding.ascii)!
+            let encryptedContent = AES256CBC.encryptString(jsonString, password: String(hashedPass.prefix(32)))
             try FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true, attributes: nil)
             try writeToIndex(vaultPath: path, what: encryptedContent!)
         } catch let error as VaultManagerErrors {
@@ -59,6 +62,7 @@ public class VaultManager {
 
     }
     
+    // burn this down
     public static func encryptVault(vaultName: String) throws {
         let encryptedVaultPass = encryptPassword(plaintextPass: currentPass)
         let indexContents = readVaultIndex(vault: vaultName)
@@ -70,21 +74,15 @@ public class VaultManager {
         }
     }
     
-    public static func decryptVault(vaultName: String, plaintextPass: String) throws {
+    public static func decryptVaultIndex(vaultName: String, plaintextPass: String) throws -> String {
         currentPass = plaintextPass
-        
         let encryptedVaultPass = encryptPassword(plaintextPass: currentPass)
         let indexContents = readVaultIndex(vault: vaultName)
-        let contentsToWrite = AES256CBC.decryptString(indexContents, password: encryptedVaultPass)
-        if (contentsToWrite == nil) {
-            print("not writing nil")
+        let decryptedIndex = AES256CBC.decryptString(indexContents, password: encryptedVaultPass)
+        if (decryptedIndex == nil) {
+            print("hi nsa")
             throw VaultManagerErrors.incorrectPassword
         }
-        do {
-            try writeToIndex(vaultPath: dir + "/" + vaultName, what: contentsToWrite!)
-        } catch let error as NSError {
-            print("COULD NOT DECRYPT THE VAULT: \(error.debugDescription)")
-            throw VaultManagerErrors.genericError(errorDetails: error.debugDescription)
-        }
+        return decryptedIndex!
     }
 }
