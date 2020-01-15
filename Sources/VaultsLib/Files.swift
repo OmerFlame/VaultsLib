@@ -32,7 +32,7 @@ func writeToIndex(vaultPath: String, what: String) throws {
 
 func readIndex(vaultPath: String) throws -> String {
     do {
-        return try String(contentsOf: URL.init(fileURLWithPath: vaultPath))
+        return try String(contentsOf: URL.init(fileURLWithPath: vaultPath + "/" + indexName))
     } catch let error as NSError {
         print("Could not read index! Reason: \(error)")
         throw FileErrors.genericError
