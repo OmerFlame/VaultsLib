@@ -16,7 +16,7 @@ public class VaultAccess {
                 readFile(path: pathToAdd)
             encrypted = AES256CBC.encrypt(string: fileContents.toHexString(), password: VaultManager.makePassword(plaintextPass: pass))!.encryptedData
             // TODO: UUID parser should kick in
-            try writeToFile(path: vaultPath+"/encrypted"+pathInVault, contents: (encrypted))
+            try writeToFile(path: vaultPath+"/"+pathInVault, contents: (encrypted))
         } catch {
             print("nope")
         }
