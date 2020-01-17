@@ -10,13 +10,13 @@ import AES256CBC
 public class VaultAccess {
     public static func addFile(pathToAdd: String, vaultPath: String, pathInVault: String, pass: String) {
         var fileContents: Data
-        let encrypted: Data
         do {
             try fileContents =
                 readFile(path: pathToAdd)
-            encrypted = AES256CBC.encrypt(string: fileContents.toHexString(), password: VaultManager.makePassword(plaintextPass: pass))!.encryptedData
+            let encrypted = encryptData(password: pass, message: fileContents)
             // TODO: UUID parser should kick in
-            try writeToFile(path: vaultPath+"/"+pathInVault, contents: (encrypted))
+            let fileData = Data(bytes: encrypted!, count: encrypted!.count)
+            try writeToFile(path: vaultPath+pathInVault, contents: (fileData))
         } catch {
             print("nope")
         }
