@@ -11,19 +11,13 @@ public enum FileErrors: Error {
     case genericError
 }
 
-func writeToFile(path: String, contents: String) throws {
-    print("Writing to:", path)
-    let data = contents.data(using: String.Encoding.ascii)!
-    let file = (path as NSString).expandingTildeInPath
-    do {
-        try data.write(to: URL.init(fileURLWithPath: file))
-    } catch  {
-        print("Could not write index!")
-    }
+func writeToFile(path: String, contents: Data) throws {
+    let file: FileHandle? = FileHandle(forWritingAtPath: path)
+    file?.write(contents)
 }
 func writeToIndex(vaultPath: String, what: String) throws {
     do {
-        try writeToFile(path: vaultPath+"/"+indexName, contents: what)
+        try writeToFile(path: vaultPath+"/"+indexName, contents: what.data(using: String.Encoding.utf8)!)
     } catch let error as NSError {
         print("COULD NOT WRITE TO INDEX: \(error.debugDescription)")
         throw FileErrors.genericError
@@ -35,6 +29,14 @@ func readIndex(vaultPath: String) throws -> String {
         return try String(contentsOf: URL.init(fileURLWithPath: vaultPath + "/" + indexName))
     } catch let error as NSError {
         print("Could not read index! Reason: \(error)")
+        throw FileErrors.genericError
+    }
+}
+func readFile(path: String) throws -> Data {
+    do {
+        return try Data(contentsOf: URL.init(fileURLWithPath: path))
+    } catch let error as NSError {
+        print("Could not read file! Reason: \(error)")
         throw FileErrors.genericError
     }
 }

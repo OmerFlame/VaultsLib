@@ -21,12 +21,10 @@ public class VaultManager {
     public static func createVault(path: String, pass: String) throws {
         do
         {
-            // Initialize the index file with the encrypted vault's name
-            let hashedPass = pass.sha256()
             let messageDictionary : [String: Any] = [:]
             let jsonData = try JSONSerialization.data(withJSONObject: messageDictionary, options: [])
             let jsonString = String(data: jsonData, encoding: String.Encoding.ascii)!
-            let encryptedContent = AES256CBC.encryptString(jsonString, password: String(hashedPass.prefix(32)))
+            let encryptedContent = AES256CBC.encryptString(jsonString, password: makePassword(plaintextPass: pass))
             try FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true, attributes: nil)
             try writeToIndex(vaultPath: path, what: encryptedContent!)
         } catch let error as VaultManagerErrors {
@@ -35,7 +33,6 @@ public class VaultManager {
         } catch {
             print("fuck you error")
         }
-        
     }
    
     public static func deleteVault(path: String) {
@@ -46,10 +43,19 @@ public class VaultManager {
         }
     }
     
-    public static func encryptPassword(plaintextPass: String) -> String {
-        let hashedPass = plaintextPass.sha256()
-        let finalPass = String(hashedPass.prefix(32))
-        return finalPass
+    public static func makePassword(plaintextPass: String) -> String {
+        if plaintextPass.count < 32 {
+            // TODO: find a better solution
+            let hashedPass = plaintextPass.sha256()
+            let finalPass = String(hashedPass.prefix(32))
+            return finalPass
+        } else if plaintextPass.count > 32 {
+            let finalPass = String(plaintextPass.prefix(32))
+            return finalPass
+        } else {
+            // Password is 32 chars
+            return plaintextPass
+        }
     }
     
     public static func readVaultIndex(vaultPath: String) -> String {
@@ -77,8 +83,7 @@ public class VaultManager {
  */
     
     public static func decryptVaultIndex(vaultPath: String, plaintextPass: String) throws -> String {
-        currentPass = plaintextPass
-        let encryptedVaultPass = encryptPassword(plaintextPass: currentPass)
+        let encryptedVaultPass = makePassword(plaintextPass: plaintextPass)
         let indexContents = readVaultIndex(vaultPath: vaultPath)
         let decryptedIndex = AES256CBC.decryptString(indexContents, password: encryptedVaultPass)
         if (decryptedIndex == nil) {
