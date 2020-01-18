@@ -12,8 +12,7 @@ public enum FileErrors: Error {
 }
 
 func writeToFile(path: String, contents: Data) throws {
-    let file: FileHandle? = FileHandle(forWritingAtPath: path)
-    file?.write(contents)
+    try contents.write(to: URL(fileURLWithPath: path))
 }
 func writeToIndex(vaultPath: String, what: String) throws {
     do {
