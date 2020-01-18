@@ -23,13 +23,14 @@ public class VaultAccess {
     }
     public static func getFile(vaultPath: String, pathInVault: String, pass: String) {
            var fileContents: Data
-           let decrypted: String
+           let decrypted: Array<UInt8>
            do {
                try fileContents =
                    readFile(path: vaultPath+"/"+pathInVault)
-            decrypted = AES256CBC.decryptString(String(decoding: fileContents, as: UTF8.self), password: pass)!
+            decrypted = decryptData(password: pass, message: fileContents)!
+            let fileData = Data(bytes: decrypted, count: decrypted.count)
                // TODO: UUID parser should kick in
-            try writeToFile(path: vaultPath+"/decrypted"+pathInVault, contents: (decrypted.data(using: String.Encoding.utf8)!))
+            try writeToFile(path: vaultPath+"/decrypted", contents: fileData)
            } catch {
                print("nope")
            }
