@@ -36,7 +36,7 @@ func decryptData(password: String, message: Data) -> Array<UInt8>? {
     while tag.count < tagLen {
         tag.append(message[ivLen+authHeaderLen+tag.count])
     }
-    while ciphertext.count < message.count-ivLen-tagLen-authHeaderLen {
+    while ciphertext.count < message.count-metadataLen {
         ciphertext.append(message[ivLen+tagLen+authHeaderLen+ciphertext.count])
     }
     do {
