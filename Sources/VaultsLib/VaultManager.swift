@@ -42,22 +42,6 @@ public class VaultManager {
             print("Unable to delete directory: \(error.debugDescription)")
         }
     }
-    
-    public static func makePassword(plaintextPass: String) -> String {
-        if plaintextPass.count < 32 {
-            // TODO: find a better solution
-            let hashedPass = plaintextPass.sha256()
-            let finalPass = String(hashedPass.prefix(32))
-            return finalPass
-        } else if plaintextPass.count > 32 {
-            let finalPass = String(plaintextPass.prefix(32))
-            return finalPass
-        } else {
-            // Password is 32 chars
-            return plaintextPass
-        }
-    }
-    
     public static func readVaultIndex(vaultPath: String) -> String {
         do {
             return try readIndex(vaultPath: vaultPath)
@@ -91,5 +75,19 @@ public class VaultManager {
             throw VaultManagerErrors.incorrectPassword
         }
         return decryptedIndex!
+    }
+}
+func makePassword(plaintextPass: String) -> String {
+    if plaintextPass.count < 32 {
+        // TODO: find a better solution
+        let hashedPass = plaintextPass.sha256()
+        let finalPass = String(hashedPass.prefix(32))
+        return finalPass
+    } else if plaintextPass.count > 32 {
+        let finalPass = String(plaintextPass.prefix(32))
+        return finalPass
+    } else {
+        // Password is 32 chars
+        return plaintextPass
     }
 }

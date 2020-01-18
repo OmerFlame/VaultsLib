@@ -7,12 +7,15 @@
 
 import Foundation
 import CryptoSwift
+let authHeaderLen = 64
+let ivLen = 12
+let tagLen = 16
 func encryptData(password: String, message: Data) -> Array<UInt8>? {
-    let iv = ChaCha20.randomIV(12)
-    let encryptedData: Array<UInt8>
+    let iv = ChaCha20.randomIV(ivLen)
     do {
-        try encryptedData = ChaCha20(key: VaultManager.makePassword(plaintextPass: password).bytes, iv: iv).encrypt(message.bytes)
-        return iv+encryptedData
+        let authHeader = randomAuthHeader()
+        let (encryptedData, tag) = try AEADChaCha20Poly1305.encrypt(message.bytes, key: makePassword(plaintextPass: password).bytes, iv: iv, authenticationHeader: authHeader)
+        return iv+authHeader+tag+encryptedData
     } catch  {
         print("Failed to encrypt data")
     }
@@ -20,19 +23,39 @@ func encryptData(password: String, message: Data) -> Array<UInt8>? {
 }
 func decryptData(password: String, message: Data) -> Array<UInt8>? {
     var iv: Array<UInt8> = []
-    var messageNoIV: Array<UInt8> = []
-    while iv.count < 12 {
+    var ciphertext: Array<UInt8> = []
+    var authHeader: Array<UInt8> = []
+    var tag: Array<UInt8> = []
+    while iv.count < ivLen {
         iv.append(message[iv.count])
     }
-    while messageNoIV.count < message.count-12 {
-        messageNoIV.append(message[12+messageNoIV.count])
+    while authHeader.count < authHeaderLen {
+        authHeader.append(message[authHeader.count+ivLen])
     }
-    let decryptedData: Array<UInt8>
+    while tag.count < tagLen {
+        tag.append(message[ivLen+authHeaderLen+tag.count])
+    }
+    while ciphertext.count < message.count-ivLen-tagLen-authHeaderLen {
+        ciphertext.append(message[ivLen+tagLen+authHeaderLen+ciphertext.count])
+    }
     do {
-        try decryptedData = ChaCha20(key: VaultManager.makePassword(plaintextPass: password).bytes, iv: iv).decrypt(messageNoIV)
+        var (decryptedData, success) = try AEADChaCha20Poly1305.decrypt(ciphertext, key: makePassword(plaintextPass: password).bytes, iv: iv, authenticationHeader: authHeader, authenticationTag: tag)
+        if !success {
+            decryptedData = []
+            print("either nsa modified this data or your storage is fucked")
+            return nil
+        }
         return decryptedData
     } catch  {
         print("Failed to decrypt data")
     }
     return nil
+}
+
+func randomAuthHeader() -> Array<UInt8> {
+    var header: Array<UInt8> = []
+    while header.count < authHeaderLen {
+        header.append(UInt8.random(in: UInt8.min..<UInt8.max))
+    }
+    return header
 }
