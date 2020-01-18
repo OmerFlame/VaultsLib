@@ -52,20 +52,6 @@ public class VaultManager {
 
     }
     
-    // burn this down
-    /*
-    public static func encryptVault(vaultName: String) throws {
-        let encryptedVaultPass = encryptPassword(plaintextPass: currentPass)
-        let indexContents = readVaultIndex(vaultPath: vaultName)
-        do {
-            let contentsToWrite = AES256CBC.encryptString(indexContents, password: encryptedVaultPass)
-            try writeToIndex(vaultPath: dir + "/" + vaultName, what: contentsToWrite!)
-        } catch let error as NSError {
-            print("COULD NOT ENCRYPT VAULT: \(error.debugDescription)")
-        }
-    }
- */
-    
     public static func decryptVaultIndex(vaultPath: String, plaintextPass: String) throws -> String {
         let encryptedVaultPass = makePassword(plaintextPass: plaintextPass)
         let indexContents = readVaultIndex(vaultPath: vaultPath)

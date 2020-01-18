@@ -10,6 +10,7 @@ import CryptoSwift
 let authHeaderLen = 64
 let ivLen = 12
 let tagLen = 16
+let metadataLen = authHeaderLen+ivLen+tagLen
 func encryptData(password: String, message: Data) -> Array<UInt8>? {
     let iv = ChaCha20.randomIV(ivLen)
     do {
