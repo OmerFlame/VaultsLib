@@ -11,16 +11,16 @@ let blocksize = 64*mbsize
 public class VaultAccess {
     public static func addFile(pathToAdd: String, vaultPath: String, pathInVault: String, pass: String) {
         // TODO: UUID parser should kick in
-        let fileToAdd = FileHandle.init(forUpdatingAtPath: pathToAdd)
+        let fileToAdd = FileHandle.init(forReadingAtPath: pathToAdd)
         FileManager.default.createFile(atPath: vaultPath+"/"+pathInVault, contents: nil, attributes: nil)
         let fileToWrite = FileHandle.init(forWritingAtPath: vaultPath+"/"+pathInVault)
         let fileSize = getFileSize(url: pathToAdd)
         var i: UInt64 = 0
         while fileSize > i {
+            fileToAdd?.seek(toFileOffset: i)
             let block = fileToAdd?.readData(ofLength: blocksize)
             let encryptedBlock = encryptData(password: pass, message: block!)
             fileToWrite?.write(Data(bytes: encryptedBlock!, count: encryptedBlock!.count))
-            fileToAdd?.seek(toFileOffset: fileToAdd!.offsetInFile+UInt64(blocksize))
             fileToWrite?.seekToEndOfFile()
             print("encrypted block")
             i += UInt64(blocksize)
@@ -35,11 +35,13 @@ public class VaultAccess {
         // Get file size of the encrypted file
         let fileSize = getFileSize(url: toDecrypt)
         while fileSize > i {
-            let block = (fileToGet?.readData(ofLength: blocksize))!
+            fileToGet?.seek(toFileOffset: i)
+            let block = (fileToGet?.readData(ofLength: blocksize+metadataLen))!
             let decryptedBlock = decryptData(password: pass, message: block)
             testfile?.write(Data(bytes: decryptedBlock!, count: decryptedBlock!.count))
             testfile?.seekToEndOfFile()
-            i += UInt64(blocksize)
+            i += UInt64(blocksize+metadataLen)
+            print("decrypted block")
         }
  }
         static func getFileSize(url: String)-> UInt64  {
