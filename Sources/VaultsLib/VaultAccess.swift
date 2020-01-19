@@ -24,9 +24,10 @@ public class VaultAccess {
             let encryptedBlock = encryptData(password: pass, message: block!)
             fileToWrite?.write(Data(bytes: encryptedBlock!, count: encryptedBlock!.count)) // Write data to file
             fileToWrite?.seekToEndOfFile() // Move to the end of that file so we'll append to it and not overwrite anything
-            print("encrypted block")
+            print("encrypted block", i/UInt64(blocksize), "/", fileSize/UInt64(blocksize))
             i += UInt64(blocksize)
         }
+        print("Added file")
         // close files
         fileToWrite?.closeFile()
         fileToAdd?.closeFile()
@@ -48,6 +49,7 @@ public class VaultAccess {
             i += UInt64(encryptedBlockLen)
             print("decrypted block")
         }
+        print("Wrote test decrypted file")
         testfile?.closeFile()
         fileToGet?.closeFile()
  }
