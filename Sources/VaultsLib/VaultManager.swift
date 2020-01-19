@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import AES256CBC
 import CryptoSwift
 
 public enum VaultManagerErrors: Error {
@@ -24,9 +23,9 @@ public class VaultManager {
             let messageDictionary : [String: Any] = [:]
             let jsonData = try JSONSerialization.data(withJSONObject: messageDictionary, options: [])
             let jsonString = String(data: jsonData, encoding: String.Encoding.ascii)!
-            let encryptedContent = AES256CBC.encryptString(jsonString, password: makePassword(plaintextPass: pass))
+            let encryptedContent = encryptData(password: makePassword(plaintextPass: pass), message: jsonString.data(using: .utf8)!)
             try FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true, attributes: nil)
-            try writeToIndex(vaultPath: path, what: encryptedContent!)
+            try writeToIndex(vaultPath: path, what: Data(bytes: encryptedContent!, count: encryptedContent?.count ?? 0))
         } catch let error as VaultManagerErrors {
             print("COULD NOT CREATE VAULT: \(error.localizedDescription)")
             throw VaultManagerErrors.genericError(errorDetails: error.localizedDescription)
@@ -42,26 +41,7 @@ public class VaultManager {
             print("Unable to delete directory: \(error.debugDescription)")
         }
     }
-    public static func readVaultIndex(vaultPath: String) -> String {
-        do {
-            return try readIndex(vaultPath: vaultPath)
-        } catch let error as NSError {
-            print("COULD NOT READ VAULT INDEX: \(error.debugDescription)")
-            return error.debugDescription
-        }
-
-    }
     
-    public static func decryptVaultIndex(vaultPath: String, plaintextPass: String) throws -> String {
-        let encryptedVaultPass = makePassword(plaintextPass: plaintextPass)
-        let indexContents = readVaultIndex(vaultPath: vaultPath)
-        let decryptedIndex = AES256CBC.decryptString(indexContents, password: encryptedVaultPass)
-        if (decryptedIndex == nil) {
-            print("hi nsa")
-            throw VaultManagerErrors.incorrectPassword
-        }
-        return decryptedIndex!
-    }
 }
 func makePassword(plaintextPass: String) -> String {
     if plaintextPass.count < 32 {

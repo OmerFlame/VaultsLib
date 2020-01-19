@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import AES256CBC
 let mbsize = 1048576
 let blocksize = 64*mbsize
 public class VaultAccess {
