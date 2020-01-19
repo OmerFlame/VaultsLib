@@ -26,10 +26,10 @@ public class VaultAccess {
             fileToWrite?.seekToEndOfFile() // Move to the end of that file so we'll append to it and not overwrite anything
             print("encrypted block")
             i += UInt64(blocksize)
-            // close files
-            fileToWrite?.closeFile()
-            fileToAdd?.closeFile()
         }
+        // close files
+        fileToWrite?.closeFile()
+        fileToAdd?.closeFile()
     }
     public static func getFile(vaultPath: String, pathInVault: String, pass: String) {
         let toDecrypt = vaultPath+"/"+pathInVault
@@ -47,9 +47,9 @@ public class VaultAccess {
             testfile?.seekToEndOfFile()
             i += UInt64(encryptedBlockLen)
             print("decrypted block")
-            testfile?.closeFile()
-            fileToGet?.closeFile()
         }
+        testfile?.closeFile()
+        fileToGet?.closeFile()
  }
         static func getFileSize(url: String)-> UInt64  {
             let fileUrl = URL(fileURLWithPath: url)
