@@ -43,13 +43,15 @@ public class VaultAccess {
         // Get file size of the encrypted file
         let fileSize = getFileSize(url: toDecrypt)
         while fileSize > i {
-            fileToGet?.seek(toFileOffset: i) // Move to the correct location in the file
-            let block = (fileToGet?.readData(ofLength: encryptedBlockLen))! // Read an encrypted block from it (bigger than normal block cuz metadata)
-            let decryptedBlock = decryptData(password: pass, message: block) // Decrypt the encrypted block
-            testfile?.write(Data(bytes: decryptedBlock!, count: decryptedBlock!.count))
-            testfile?.seekToEndOfFile()
-            i += UInt64(encryptedBlockLen)
-            print("decrypted block")
+            autoreleasepool(invoking: {
+                fileToGet?.seek(toFileOffset: i) // Move to the correct location in the file
+                let block = (fileToGet?.readData(ofLength: encryptedBlockLen))! // Read an encrypted block from it (bigger than normal block cuz metadata)
+                let decryptedBlock = decryptData(password: pass, message: block) // Decrypt the encrypted block
+                testfile?.write(Data(bytes: decryptedBlock!, count: decryptedBlock!.count))
+                testfile?.seekToEndOfFile()
+                i += UInt64(encryptedBlockLen)
+                print("decrypted block")
+            })
         }
         print("Wrote test decrypted file")
         testfile?.closeFile()
