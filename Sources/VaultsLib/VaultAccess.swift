@@ -18,14 +18,16 @@ public class VaultAccess {
         let fileSize = getFileSize(url: pathToAdd) // Get the file size of the file we're reading
         var i: UInt64 = 0 // Basically our current offset in the file we're reading
         while fileSize > i {
-            // Iterate over blocks in the file
-            fileToAdd?.seek(toFileOffset: i) // Move file pointer after the block we just read
-            let block = fileToAdd?.readData(ofLength: blocksize) // Read 64MB from that file pointer
-            let encryptedBlock = encryptData(password: pass, message: block!)
-            fileToWrite?.write(Data(bytes: encryptedBlock!, count: encryptedBlock!.count)) // Write data to file
-            fileToWrite?.seekToEndOfFile() // Move to the end of that file so we'll append to it and not overwrite anything
-            print("encrypted block", i/UInt64(blocksize), "/", fileSize/UInt64(blocksize))
-            i += UInt64(blocksize)
+            autoreleasepool(invoking: {
+                // Iterate over blocks in the file
+                fileToAdd?.seek(toFileOffset: i) // Move file pointer after the block we just read
+                let block = fileToAdd?.readData(ofLength: blocksize) // Read 64MB from that file pointer
+                let encryptedBlock = encryptData(password: pass, message: block!)
+                fileToWrite?.write(Data(bytes: encryptedBlock!, count: encryptedBlock!.count)) // Write data to file
+                fileToWrite?.seekToEndOfFile() // Move to the end of that file so we'll append to it and not overwrite anything
+                print("encrypted block", i/UInt64(blocksize), "/", fileSize/UInt64(blocksize))
+                i += UInt64(blocksize)
+            })
         }
         print("Added file")
         // close files
