@@ -7,7 +7,7 @@
 
 import Foundation
 let mbsize = 1048576
-let blocksize = 64*mbsize
+let blocksize = 32*mbsize
 let encryptedBlockLen = blocksize+metadataLen
 public class VaultAccess {
     public static func addFile(pathToAdd: String, vaultPath: String, pathInVault: String, pass: String) {
