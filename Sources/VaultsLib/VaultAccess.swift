@@ -21,7 +21,7 @@ public class VaultAccess {
             autoreleasepool(invoking: {
                 // Iterate over blocks in the file
                 fileToAdd?.seek(toFileOffset: i) // Move file pointer after the block we just read
-                let block = fileToAdd?.readData(ofLength: blocksize) // Read 64MB from that file pointer
+                let block = fileToAdd?.readData(ofLength: blocksize) // Read <blocksize> from that file pointer
                 let encryptedBlock = encryptData(password: pass, message: block!)
                 fileToWrite?.write(Data(bytes: encryptedBlock!, count: encryptedBlock!.count)) // Write data to file
                 fileToWrite?.seekToEndOfFile() // Move to the end of that file so we'll append to it and not overwrite anything
