@@ -3,7 +3,7 @@
 //  
 //
 //  Created by Asaf Niv on 1/1/20.
-//
+//  Copyright © 2020 Asaf Niv. All rights reserved.
 
 import Foundation
 import CryptoSwift
@@ -42,18 +42,4 @@ public class VaultManager {
         }
     }
     
-}
-func makePassword(plaintextPass: String) -> String {
-    if plaintextPass.count < 32 {
-        // TODO: find a better solution
-        let hashedPass = plaintextPass.sha256()
-        let finalPass = String(hashedPass.prefix(32))
-        return finalPass
-    } else if plaintextPass.count > 32 {
-        let finalPass = String(plaintextPass.prefix(32))
-        return finalPass
-    } else {
-        // Password is 32 chars
-        return plaintextPass
-    }
 }

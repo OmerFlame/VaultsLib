@@ -3,7 +3,7 @@
 //
 //
 //  Created by Asaf Niv on 17/01/2020.
-//
+//  Copyright © 2020 Asaf Niv. All rights reserved.
 
 import Foundation
 import CryptoSwift
@@ -64,4 +64,19 @@ func randomAuthHeader() -> Array<UInt8> {
         header.append(UInt8.random(in: UInt8.min..<UInt8.max))
     }
     return header
+}
+
+func makePassword(plaintextPass: String) -> String {
+    if plaintextPass.count < 32 {
+        // TODO: find a better solution
+        let hashedPass = plaintextPass.sha256()
+        let finalPass = String(hashedPass.prefix(32))
+        return finalPass
+    } else if plaintextPass.count > 32 {
+        let finalPass = String(plaintextPass.prefix(32))
+        return finalPass
+    } else {
+        // Password is 32 chars
+        return plaintextPass
+    }
 }

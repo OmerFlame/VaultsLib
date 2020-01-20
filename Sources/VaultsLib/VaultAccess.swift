@@ -3,7 +3,7 @@
 //  
 //
 //  Created by Asaf Niv on 16/01/2020.
-//
+//  Copyright © 2020 Asaf Niv. All rights reserved.
 
 import Foundation
 let mbsize = 1048576
