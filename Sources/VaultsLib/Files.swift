@@ -9,18 +9,11 @@ import Foundation
 
 public enum FileErrors: Error {
     case genericError
+    case indexError
 }
 
 func writeToFile(path: String, contents: Data) throws {
     try contents.write(to: URL(fileURLWithPath: path))
-}
-func writeToIndex(vaultPath: String, what: Data) throws {
-    do {
-        try writeToFile(path: vaultPath+"/"+indexName, contents: what)
-    } catch let error as NSError {
-        print("COULD NOT WRITE TO INDEX: \(error.debugDescription)")
-        throw FileErrors.genericError
-    }
 }
 
 func readFile(path: String) throws -> Data {

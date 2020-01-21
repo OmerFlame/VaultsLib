@@ -18,20 +18,13 @@ public class VaultManager {
     // pass: your password
     
     public static func createVault(path: String, pass: String) throws {
-        do
-        {
-            let messageDictionary : [String: Any] = [:]
-            let jsonData = try JSONSerialization.data(withJSONObject: messageDictionary, options: [])
-            let jsonString = String(data: jsonData, encoding: String.Encoding.ascii)!
-            let encryptedContent = encryptData(password: makePassword(plaintextPass: pass), message: jsonString.data(using: .utf8)!)
+        do {
             try FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true, attributes: nil)
-            try writeToIndex(vaultPath: path, what: Data(bytes: encryptedContent!, count: encryptedContent?.count ?? 0))
-        } catch let error as VaultManagerErrors {
-            print("COULD NOT CREATE VAULT: \(error.localizedDescription)")
-            throw VaultManagerErrors.genericError(errorDetails: error.localizedDescription)
         } catch {
-            print("fuck you error")
+            throw VaultManagerErrors.genericError(errorDetails: "Could not create vault")
         }
+        let index : [String: String] = [:]
+        writeIndex(vaultPath: path, index: index, vaultPass: pass)
     }
    
     public static func deleteVault(path: String) {

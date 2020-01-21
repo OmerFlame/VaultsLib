@@ -13,8 +13,9 @@ public class VaultAccess {
     public static func addFile(pathToAdd: String, vaultPath: String, pathInVault: String, pass: String) {
         // TODO: UUID parser should kick in
         let fileToAdd = FileHandle.init(forReadingAtPath: pathToAdd) // Open a file handle for reading
-        FileManager.default.createFile(atPath: vaultPath+"/"+pathInVault, contents: nil, attributes: nil) // Create the file we're going to write to
-        let fileToWrite = FileHandle.init(forWritingAtPath: vaultPath+"/"+pathInVault) // Open a file handle for that file
+        let fileName = UUID() // Random file name
+        FileManager.default.createFile(atPath: vaultPath+"/"+fileName.uuidString, contents: nil, attributes: nil) // Create the file we're going to write to
+        let fileToWrite = FileHandle.init(forWritingAtPath: vaultPath+"/"+fileName.uuidString) // Open a file handle for that file
         let fileSize = getFileSize(url: pathToAdd) // Get the file size of the file we're reading
         var i: UInt64 = 0 // Basically our current offset in the file we're reading
         while fileSize > i {
@@ -29,6 +30,7 @@ public class VaultAccess {
                 i += UInt64(blocksize)
             })
         }
+        addUUIDToIndex(uuid: fileName, filename: "test file", vaultPath: vaultPath, vaultPass: pass)
         print("Added file")
         // close files
         fileToWrite?.closeFile()
