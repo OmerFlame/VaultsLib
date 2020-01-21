@@ -18,17 +18,18 @@ public class VaultAccess {
         let fileToWrite = FileHandle.init(forWritingAtPath: vaultPath+"/"+fileName.uuidString) // Open a file handle for that file
         let fileSize = getFileSize(url: pathToAdd) // Get the file size of the file we're reading
         var i: UInt64 = 0 // Basically our current offset in the file we're reading
+        // Variables for the loop:
+        var block: Data
+        var encryptedBlock: Array<UInt8>
         while fileSize > i {
-            autoreleasepool(invoking: {
                 // Iterate over blocks in the file
                 fileToAdd?.seek(toFileOffset: i) // Move file pointer after the block we just read
-                let block = fileToAdd?.readData(ofLength: blocksize) // Read <blocksize> from that file pointer
-                let encryptedBlock = encryptData(password: pass, message: block!)
-                fileToWrite?.write(Data(bytes: encryptedBlock!, count: encryptedBlock!.count)) // Write data to file
+                block = (fileToAdd?.readData(ofLength: blocksize))! // Read <blocksize> from that file pointer
+                encryptedBlock = encryptData(password: pass, message: block)!
+                fileToWrite?.write(Data(bytes: encryptedBlock, count: encryptedBlock.count)) // Write data to file
                 fileToWrite?.seekToEndOfFile() // Move to the end of that file so we'll append to it and not overwrite anything
                 print("encrypted block", i/UInt64(blocksize), "/", fileSize/UInt64(blocksize))
                 i += UInt64(blocksize)
-            })
         }
         addUUIDToIndex(uuid: fileName, filename: "test file", vaultPath: vaultPath, vaultPass: pass)
         print("Added file")
@@ -44,16 +45,16 @@ public class VaultAccess {
         var i: UInt64 = 0
         // Get file size of the encrypted file
         let fileSize = getFileSize(url: toDecrypt)
+        var block: Data
+        var decryptedBlock: Array<UInt8>
         while fileSize > i {
-            autoreleasepool(invoking: {
                 fileToGet?.seek(toFileOffset: i) // Move to the correct location in the file
-                let block = (fileToGet?.readData(ofLength: encryptedBlockLen))! // Read an encrypted block from it (bigger than normal block cuz metadata)
-                let decryptedBlock = decryptData(password: pass, message: block) // Decrypt the encrypted block
-                testfile?.write(Data(bytes: decryptedBlock!, count: decryptedBlock!.count))
+                block = (fileToGet?.readData(ofLength: encryptedBlockLen))! // Read an encrypted block from it (bigger than normal block cuz metadata)
+                decryptedBlock = decryptData(password: pass, message: block)! // Decrypt the encrypted block
+                testfile?.write(Data(bytes: decryptedBlock, count: decryptedBlock.count))
                 testfile?.seekToEndOfFile()
                 i += UInt64(encryptedBlockLen)
                 print("decrypted block")
-            })
         }
         print("Wrote test decrypted file")
         testfile?.closeFile()
