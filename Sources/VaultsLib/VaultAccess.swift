@@ -21,14 +21,14 @@ public class VaultAccess {
         // Variables for the loop:
         var block: Data
         var encryptedBlock: Array<UInt8>
-        while fileSize > i {
+        while fileSize! > i {
                 // Iterate over blocks in the file
                 fileToAdd?.seek(toFileOffset: i) // Move file pointer after the block we just read
                 block = (fileToAdd?.readData(ofLength: blocksize))! // Read <blocksize> from that file pointer
                 encryptedBlock = encryptData(password: pass, message: block)!
                 fileToWrite?.write(Data(bytes: encryptedBlock, count: encryptedBlock.count)) // Write data to file
                 fileToWrite?.seekToEndOfFile() // Move to the end of that file so we'll append to it and not overwrite anything
-                print("encrypted block", i/UInt64(blocksize), "/", fileSize/UInt64(blocksize))
+            print("encrypted block", i/UInt64(blocksize), "/", fileSize!/UInt64(blocksize))
                 i += UInt64(blocksize)
         }
         addUUIDToIndex(uuid: fileName, filename: "test file", vaultPath: vaultPath, vaultPass: pass)
@@ -44,7 +44,7 @@ public class VaultAccess {
         let testfile = FileHandle.init(forWritingAtPath: vaultPath+"/decrypted")
         var i: UInt64 = 0
         // Get file size of the encrypted file
-        let fileSize = getFileSize(path: toDecrypt)
+        let fileSize = getFileSize(path: toDecrypt)!
         var block: Data
         var decryptedBlock: Array<UInt8>
         while fileSize > i {
@@ -60,8 +60,14 @@ public class VaultAccess {
         testfile?.closeFile()
         fileToGet?.closeFile()
  }
-        static func getFileSize(path: String)-> UInt64  {
-            let fileSize = try! (FileManager.default.attributesOfItem(atPath: path)[FileAttributeKey.size]! as AnyObject).longLongValue
-            return UInt64(fileSize!)
+        static func getFileSize(path: String)-> UInt64?  {
+            do {
+                let fileAttr = try FileManager.default.attributesOfItem(atPath: path)
+                let fileSize = fileAttr[FileAttributeKey.size] as! UInt64
+                return fileSize
+            } catch {
+                print("Failed to get file size!")
+            }
+            return nil
         }
 }
