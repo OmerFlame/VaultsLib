@@ -16,7 +16,7 @@ public class VaultAccess {
         let fileName = UUID() // Random file name
         FileManager.default.createFile(atPath: vaultPath+"/"+fileName.uuidString, contents: nil, attributes: nil) // Create the file we're going to write to
         let fileToWrite = FileHandle.init(forWritingAtPath: vaultPath+"/"+fileName.uuidString) // Open a file handle for that file
-        let fileSize = getFileSize(url: pathToAdd) // Get the file size of the file we're reading
+        let fileSize = getFileSize(path: pathToAdd) // Get the file size of the file we're reading
         var i: UInt64 = 0 // Basically our current offset in the file we're reading
         // Variables for the loop:
         var block: Data
@@ -44,7 +44,7 @@ public class VaultAccess {
         let testfile = FileHandle.init(forWritingAtPath: vaultPath+"/decrypted")
         var i: UInt64 = 0
         // Get file size of the encrypted file
-        let fileSize = getFileSize(url: toDecrypt)
+        let fileSize = getFileSize(path: toDecrypt)
         var block: Data
         var decryptedBlock: Array<UInt8>
         while fileSize > i {
@@ -60,19 +60,8 @@ public class VaultAccess {
         testfile?.closeFile()
         fileToGet?.closeFile()
  }
-        static func getFileSize(url: String)-> UInt64  {
-            let fileUrl = URL(fileURLWithPath: url)
-            let fileManager = FileManager.default
-            do {
-                let attributes = try fileManager.attributesOfItem(atPath: (fileUrl.path))
-                var fileSize = attributes[FileAttributeKey.size] as! UInt64
-                let dict = attributes as NSDictionary
-                fileSize = dict.fileSize()
-                return fileSize
-            }
-            catch let error as NSError {
-                print("Something went wrong: \(error)")
-                return 0
-            }
+        static func getFileSize(path: String)-> UInt64  {
+            let fileSize = try! (FileManager.default.attributesOfItem(atPath: path)[FileAttributeKey.size]! as AnyObject).longLongValue
+            return UInt64(fileSize!)
         }
 }
