@@ -11,6 +11,9 @@ let authHeaderLen = 64
 let ivLen = 12
 let tagLen = 16
 let metadataLen = authHeaderLen+ivLen+tagLen
+public enum cryptoErrors: Error {
+    case invalidData
+}
 func encryptData(password: String, message: Data) -> Array<UInt8>? {
     let iv = ChaCha20.randomIV(ivLen) // Make a random IV
     do {
@@ -22,7 +25,7 @@ func encryptData(password: String, message: Data) -> Array<UInt8>? {
     }
     return nil
 }
-func decryptData(password: String, message: Data) -> Array<UInt8>? {
+func decryptData(password: String, message: Data) throws -> Array<UInt8>? {
     var iv: Array<UInt8> = []
     var ciphertext: Array<UInt8> = []
     var authHeader: Array<UInt8> = []

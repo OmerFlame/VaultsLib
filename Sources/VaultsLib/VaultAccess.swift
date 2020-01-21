@@ -10,8 +10,8 @@ let mbsize = 1048576
 let blocksize = 32*mbsize
 let encryptedBlockLen = blocksize+metadataLen
 public class VaultAccess {
+    // TODO: Deal with folders
     public static func addFile(pathToAdd: String, vaultPath: String, pathInVault: String, pass: String) {
-        // TODO: UUID parser should kick in
         let fileToAdd = FileHandle.init(forReadingAtPath: pathToAdd) // Open a file handle for reading
         let fileName = UUID() // Random file name
         FileManager.default.createFile(atPath: vaultPath+"/"+fileName.uuidString, contents: nil, attributes: nil) // Create the file we're going to write to
@@ -31,14 +31,24 @@ public class VaultAccess {
             print("encrypted block", i/UInt64(blocksize), "/", fileSize!/UInt64(blocksize))
                 i += UInt64(blocksize)
         }
-        addUUIDToIndex(uuid: fileName, filename: "test file", vaultPath: vaultPath, vaultPass: pass)
+        addUUIDToIndex(uuid: fileName, filename: pathInVault, vaultPath: vaultPath, vaultPass: pass)
         print("Added file")
         // close files
         fileToWrite?.closeFile()
         fileToAdd?.closeFile()
     }
-    public static func getFile(vaultPath: String, pathInVault: String, pass: String) {
-        let toDecrypt = vaultPath+"/"+pathInVault
+    // Get a file from the vault
+    // vaultPath: yknow what
+    // realPathInVault: the path in the vault, something like: a/b, not uuid/uuid
+    public static func getFile(vaultPath: String, pathInVault: String, pass: String) throws {
+        let index: Dictionary<String, String>?
+        do {
+            try index = loadIndex(vaultPath: vaultPath, pass: pass)
+        } catch {
+                throw cryptoErrors.invalidData
+        }
+        let filename = index?.getKey(forValue: pathInVault)
+        let toDecrypt = vaultPath+"/"+filename!
         let fileToGet = FileHandle.init(forReadingAtPath: toDecrypt)
         FileManager.default.createFile(atPath: vaultPath+"/decrypted", contents: nil, attributes: nil)
         let testfile = FileHandle.init(forWritingAtPath: vaultPath+"/decrypted")
@@ -48,13 +58,17 @@ public class VaultAccess {
         var block: Data
         var decryptedBlock: Array<UInt8>
         while fileSize > i {
-                fileToGet?.seek(toFileOffset: i) // Move to the correct location in the file
-                block = (fileToGet?.readData(ofLength: encryptedBlockLen))! // Read an encrypted block from it (bigger than normal block cuz metadata)
-                decryptedBlock = decryptData(password: pass, message: block)! // Decrypt the encrypted block
-                testfile?.write(Data(bytes: decryptedBlock, count: decryptedBlock.count))
-                testfile?.seekToEndOfFile()
-                i += UInt64(encryptedBlockLen)
-                print("decrypted block")
+            fileToGet?.seek(toFileOffset: i) // Move to the correct location in the file
+            block = (fileToGet?.readData(ofLength: encryptedBlockLen))! // Read an encrypted block from it (bigger than normal block cuz metadata)
+            do {
+                try decryptedBlock = decryptData(password: pass, message: block) ?? [0] // Decrypt the encrypted block
+            } catch cryptoErrors.invalidData {
+                throw cryptoErrors.invalidData
+            }
+            testfile?.write(Data(bytes: decryptedBlock, count: decryptedBlock.count))
+            testfile?.seekToEndOfFile()
+            i += UInt64(encryptedBlockLen)
+            print("decrypted block")
         }
         print("Wrote test decrypted file")
         testfile?.closeFile()
@@ -70,4 +84,15 @@ public class VaultAccess {
             }
             return nil
         }
+        public static func isCorrectPassword(vaultPath: String, pass: String) -> Bool {
+            do {
+                try _ = loadIndex(vaultPath: vaultPath, pass: pass)
+                return true
+            } catch cryptoErrors.invalidData{
+                return false
+            } catch {
+                return false
+            }
+        }
 }
+

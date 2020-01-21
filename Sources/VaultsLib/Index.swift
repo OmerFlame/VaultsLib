@@ -19,8 +19,14 @@ func addUUIDToIndex(uuid: UUID, filename: String, vaultPath: String, vaultPass: 
 func loadIndex(vaultPath: String, pass: String) throws -> Dictionary<String, String>? {
     do {
         let indexContent = try readFile(path: vaultPath+"/"+indexName)
-        let decryptedIndex = decryptData(password: pass, message: indexContent)
-        let jsonResult = try JSONSerialization.jsonObject(with: Data(bytes: decryptedIndex!, count: decryptedIndex!.count), options: .mutableLeaves) as? Dictionary<String, String>
+        var decryptedIndex: Array<UInt8> = []
+        do {
+            try decryptedIndex = decryptData(password: pass, message: indexContent) ?? [0]
+        } catch cryptoErrors.invalidData{
+            print("Invalid data in index")
+            throw cryptoErrors.invalidData
+        }
+        let jsonResult = try JSONSerialization.jsonObject(with: Data(bytes: decryptedIndex, count: decryptedIndex.count), options: .mutableLeaves) as? Dictionary<String, String>
         return jsonResult
     } catch {
         print("Failed to read index")
@@ -36,5 +42,11 @@ func writeIndex(vaultPath: String, index: Dictionary<String, String>, vaultPass:
         try writeToFile(path: vaultPath+"/"+indexName, contents: Data(bytes: encryptedContent!, count: encryptedContent!.count))
     } catch {
         print("Failed to write index")
+    }
+}
+// To get a UUID by value
+extension Dictionary where Value: Equatable {
+    func getKey(forValue val: Value) -> Key? {
+        return first(where: { $1 == val })?.key
     }
 }
