@@ -64,7 +64,7 @@ func decryptData(password: String, message: Data) throws -> Array<UInt8>? {
 func randomAuthHeader() -> Array<UInt8> {
     var header: Array<UInt8> = []
     while header.count < authHeaderLen {
-        header.append(UInt8.random(in: UInt8.min..<UInt8.max))
+        header.append(UInt8.random(in: UInt8.min...UInt8.max))
     }
     return header
 }
