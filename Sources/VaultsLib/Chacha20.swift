@@ -13,8 +13,19 @@ let tagLen = 16
 let metadataLen = authHeaderLen+ivLen+tagLen
 public enum cryptoErrors: Error {
     case invalidData
+    case decryptError
 }
-func encryptData(password: String, message: Data) -> Array<UInt8>? {
+
+/**
+ Encrypts given data.
+ 
+ - Parameters:
+    - password: The password to encrypt the data with
+    - message: The data to encrypt
+ 
+ - returns: If successful, returns an Array, includes the init vector + auth header + tag + encrypted data (in this order) as an encrypted block. If failed, returns `nil`
+ */
+func encryptData(password: String, messsage: Data) -> Array<UInt8>? {
     let iv = ChaCha20.randomIV(ivLen) // Make a random IV
     do {
         let authHeader = randomAuthHeader() // Random auth header for Poly1305 (verification)
@@ -25,6 +36,19 @@ func encryptData(password: String, message: Data) -> Array<UInt8>? {
     }
     return nil
 }
+
+/**
+ Decrypts given data.
+ 
+ - Parameters:
+    - password: The password to decrypt the data with
+    - message: The data to decrypt
+ 
+ - throws: An error of type `decryptError`
+ 
+ - returns: If successful, returns the decrypted data. If failed, returns `nil`
+ 
+ */
 func decryptData(password: String, message: Data) throws -> Array<UInt8>? {
     var iv: Array<UInt8> = []
     var ciphertext: Array<UInt8> = []
@@ -55,12 +79,18 @@ func decryptData(password: String, message: Data) throws -> Array<UInt8>? {
             return nil
         }
         return decryptedData
-    } catch  {
+    } catch {
         print("Failed to decrypt data")
+        throw cryptoErrors.decryptError
     }
     return nil
 }
 
+/**
+ Generates a random auth header.
+ 
+ - returns: A random auth header
+ */
 func randomAuthHeader() -> Array<UInt8> {
     var header: Array<UInt8> = []
     while header.count < authHeaderLen {
@@ -69,6 +99,14 @@ func randomAuthHeader() -> Array<UInt8> {
     return header
 }
 
+/**
+ Derives a 32-byte key.
+ 
+ - Parameters:
+    - plaintextPass: The password to derive the key from.
+ 
+ - Returns: If the given password is shorter or longer than 32 bytes, then returns a SHA256-derived key. If the given password is 32 bytes long, then it is returned as-is.
+ */
 func makePassword(plaintextPass: String) -> String {
     if plaintextPass.count < 32 {
         // TODO: find a better solution
