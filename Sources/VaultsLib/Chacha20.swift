@@ -25,7 +25,7 @@ public enum cryptoErrors: Error {
  
  - returns: If successful, returns an Array, includes the init vector + auth header + tag + encrypted data (in this order) as an encrypted block. If failed, returns `nil`
  */
-func encryptData(password: String, messsage: Data) -> Array<UInt8>? {
+func encryptData(password: String, message: Data) -> Array<UInt8>? {
     let iv = ChaCha20.randomIV(ivLen) // Make a random IV
     do {
         let authHeader = randomAuthHeader() // Random auth header for Poly1305 (verification)
