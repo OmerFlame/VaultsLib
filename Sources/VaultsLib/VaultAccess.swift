@@ -37,6 +37,14 @@ public class VaultAccess {
         fileToWrite?.closeFile()
         fileToAdd?.closeFile()
     }
+    
+    public static func createDirectory(vaultPath: String, pathInVault: String, dirName: String, vaultPass: String) {
+        let dirUUID = UUID()
+        
+        FileManager.default.createDirectory(atPath: vaultPath + "/" + pathInVault + "/" + dirName, withIntermediateDirectories: true, attributes: nil)
+        addUUIDToIndex(uuid: dirUUID, fileName: dirName, vaultPath: vaultPath, vaultPass: vaultPass)
+        print("Created directory and added to index")
+    }
     // Get a file from the vault
     // vaultPath: yknow what
     // realPathInVault: the path in the vault, something like: a/b, not uuid/uuid
