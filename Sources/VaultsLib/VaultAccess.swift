@@ -11,11 +11,11 @@ let blocksize = 32*mbsize
 let encryptedBlockLen = blocksize+metadataLen
 public class VaultAccess {
     // TODO: Deal with folders
-    public static func addFile(pathToAdd: String, vaultPath: String, pathInVault: String, pass: String) {
+    public static func addFile(plainTextName: String, pathToAdd: String, vaultPath: String, pathInVault: String, pass: String) {
         let fileToAdd = FileHandle.init(forReadingAtPath: pathToAdd) // Open a file handle for reading
         let fileName = UUID() // Random file name
-        FileManager.default.createFile(atPath: vaultPath+"/"+fileName.uuidString, contents: nil, attributes: nil) // Create the file we're going to write to
-        let fileToWrite = FileHandle.init(forWritingAtPath: vaultPath+"/"+fileName.uuidString) // Open a file handle for that file
+        FileManager.default.createFile(atPath: vaultPath+pathInVault+fileName.uuidString, contents: nil, attributes: nil) // Create the file we're going to write to
+        let fileToWrite = FileHandle.init(forWritingAtPath: vaultPath+pathInVault+"/"+fileName.uuidString) // Open a file handle for that file
         let fileSize = getFileSize(path: pathToAdd) // Get the file size of the file we're reading
         var i: UInt64 = 0 // Basically our current offset in the file we're reading
         // Variables for the loop:
@@ -31,7 +31,7 @@ public class VaultAccess {
             print("encrypted block", i/UInt64(blocksize), "/", fileSize!/UInt64(blocksize))
                 i += UInt64(blocksize)
         }
-        addUUIDToIndex(uuid: fileName, filename: pathInVault, vaultPath: vaultPath, vaultPass: pass)
+        addUUIDToIndex(uuid: fileName, filename: plainTextName, vaultPath: vaultPath, vaultPass: pass)
         print("Added file")
         // close files
         fileToWrite?.closeFile()
@@ -41,9 +41,13 @@ public class VaultAccess {
     public static func createDirectory(vaultPath: String, pathInVault: String, dirName: String, vaultPass: String) {
         let dirUUID = UUID()
         
-        FileManager.default.createDirectory(atPath: vaultPath + "/" + pathInVault + "/" + dirName, withIntermediateDirectories: true, attributes: nil)
-        addUUIDToIndex(uuid: dirUUID, fileName: dirName, vaultPath: vaultPath, vaultPass: vaultPass)
-        print("Created directory and added to index")
+        do {
+            try FileManager.default.createDirectory(atPath: vaultPath+pathInVault+dirUUID.uuidString, withIntermediateDirectories: true, attributes: nil)
+            addUUIDToIndex(uuid: dirUUID, filename: dirName, vaultPath: vaultPath, vaultPass: vaultPass)
+            print("Created directory and added to index")
+        } catch {
+            print("Unable to create da shitty dir")
+        }
     }
     // Get a file from the vault
     // vaultPath: yknow what
