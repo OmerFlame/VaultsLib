@@ -10,6 +10,16 @@ let mbsize = 1048576
 let blocksize = 32*mbsize
 let encryptedBlockLen = blocksize+metadataLen
 public class VaultAccess {
+    public static func getIndex(vaultPath: String, pass: String) throws -> Dictionary<String, String>? {
+        do {
+            let index = try loadIndex(vaultPath: vaultPath, pass: pass)
+            return index
+        } catch {
+            print("cannot load index for given vault path!")
+            throw FileErrors.indexError
+        }
+    }
+    
     // TODO: Deal with folders
     public static func addFile(plainTextName: String, pathToAdd: String, vaultPath: String, pathInVault: String, pass: String) {
         let fileToAdd = FileHandle.init(forReadingAtPath: pathToAdd) // Open a file handle for reading
