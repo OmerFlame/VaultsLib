@@ -121,7 +121,7 @@ public class VaultAccess {
             fileToGet?.seek(toFileOffset: 0)
         } else {
             //fileToGet?.seek(toFileOffset: UInt64(offset) - UInt64(metadataLen))
-            fileToGet?.seek(toFileOffset: UInt64(offset) - UInt64(metadataLen))
+            fileToGet?.seek(toFileOffset: UInt64(offset))
         }
         
         block = (fileToGet?.readData(ofLength: encryptedBlockLen))!
