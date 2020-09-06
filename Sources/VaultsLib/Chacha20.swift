@@ -83,7 +83,7 @@ func decryptData(password: String, message: Data) throws -> Array<UInt8>? {
         print("Failed to decrypt data")
         throw cryptoErrors.decryptError
     }
-    return nil
+    //return nil
 }
 
 /**
